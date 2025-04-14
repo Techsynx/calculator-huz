@@ -12,7 +12,7 @@ st.markdown("""
 
 
 st.markdown("""
-    <h1 style="font-size: 25px; font-weight: bold; color: #C0C0C0;">Hello, I am huzaifa, welcome in my Advance Calculator</h1>
+    <h1 style="font-size: 25px; font-weight: bold; color: #C0C0C0;">Hello, I am Huzaifa , welcome in my Advance Calculator</h1>
 """, unsafe_allow_html=True)
 
 class Calculator:
@@ -88,18 +88,18 @@ class CalculatorUI:
                     continue
                 button = str(button)
                 if button == '+':
-                    button = '+'
+                    button = 'Add'
                 elif button == '-':
-                    button = '-'
+                    button = 'Sub'
                 elif button == '*':
-                    button = '*'
+                    button = 'Mul'
                 with cols[i]: 
                     if st.button(button):
-                        if button == '+':
+                        if button == 'Add':
                             self.handle_button_click('+')
-                        elif button == '-':
+                        elif button == 'Sub':
                             self.handle_button_click('-')
-                        elif button == '*':
+                        elif button == 'Mul':
                             self.handle_button_click('*')
                         else:
                             self.handle_button_click(str(button))
@@ -120,5 +120,4 @@ calculator = Calculator()
 calculator_ui = CalculatorUI(calculator)
 calculator_ui.display_calculator_buttons()
 calculator_ui.display_result()
-
 
