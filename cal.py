@@ -7,7 +7,6 @@ st.markdown("""
         .stApp {
             background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%) !important;
         }
-
         button[kind="secondary"] {
             font-size: 24px !important;
             height: 60px !important;
@@ -15,41 +14,47 @@ st.markdown("""
             border-radius: 12px !important;
             margin: 2px 0 !important;
         }
-
         .highlight-btn {
             background-color: #FFD700 !important;
             color: black !important;
         }
-
         .result {
             font-size: 40px;
             font-weight: bold;
             color: #000000;
             padding-top: 15px;
         }
+        input[type="text"] {
+            font-size: 24px !important;
+            padding: 10px !important;
+        }
     </style>
+    <script>
+        window.onload = function() {
+            const input = window.parent.document.querySelector('input[type="text"]');
+            if(input) input.focus();
+        }
+    </script>
 """, unsafe_allow_html=True)
+
 
 # --- Calculator Logic ---
 class Calculator:
     def perform_operation(self, a, b, operator):
-        if operator == '+':
+        if operator == '➕':
             return a + b
-        elif operator == '-':
+        elif operator == '➖':
             return a - b
-        elif operator == '*':
+        elif operator == '✖️':
             return a * b
-        elif operator == '/':
+        elif operator == '➗':
             if b == 0:
                 raise ValueError('Error (division by zero)')
             return a / b
-        elif operator == '%':
-            return a % b
-        elif operator == '//':
-            return a // b
 
     def calculate(self, expression_input):
         try:
+            expression_input = expression_input.replace('➕', '+').replace('➖', '-').replace('✖️', '*').replace('➗', '/')
             operators = ['+', '-', '*', '/', '%', '//']
             split_result = [x.strip() for x in re.split(r'[\+\-\*/%\s//]+', expression_input)]
             extracted_operators = [op for op in expression_input if op in operators]
@@ -65,14 +70,13 @@ class Calculator:
         except Exception as e:
             return f"An unexpected error occurred: {e}"
 
+
 # --- Calculator UI ---
 class CalculatorUI:
     def __init__(self, calculator):
         self.calculator = calculator
         if "expression" not in st.session_state:
             st.session_state.expression = ""
-        if "last_key" not in st.session_state:
-            st.session_state.last_key = ""
         if "calculated_result" not in st.session_state:
             st.session_state.calculated_result = ""
 
@@ -82,14 +86,13 @@ class CalculatorUI:
             st.session_state.calculated_result = ""
         else:
             st.session_state.expression += str(value)
-        st.session_state.last_key = str(value)
 
     def display_calculator_buttons(self):
         rows = [
-            ['7', '8', '9', '+'],
-            ['4', '5', '6', '-'],
-            ['1', '2', '3', '*'],
-            ['0', '/', 'C', '']
+            ['7', '8', '9', '➕'],
+            ['4', '5', '6', '➖'],
+            ['1', '2', '3', '✖️'],
+            ['0', '➗', 'C', '']
         ]
 
         for row in rows:
@@ -97,28 +100,23 @@ class CalculatorUI:
             for i, key in enumerate(row):
                 if key == '':
                     continue
-
                 with cols[i]:
                     if st.button(key, key=f"btn_{key}"):
                         self.handle_button_click(key)
 
     def display_input_and_result(self):
-        expression_input = st.text_input("Enter your expression:", 
-                                         value=st.session_state.expression, 
-                                         key="expression_input")
+        with st.form("input_form", clear_on_submit=False):
+            expression_input = st.text_input("Enter your expression:",
+                                             value=st.session_state.expression,
+                                             key="expression_input")
 
-        # Sync keyboard typed key for highlight simulation
-        if expression_input:
-            last_char = expression_input[-1]
-            if last_char.isalnum() or last_char in ['+', '-', '*', '/']:
-                st.session_state.last_key = last_char
-            st.session_state.expression = expression_input
+            submitted = st.form_submit_button("Calculate")
+            if submitted:
+                st.session_state.expression = expression_input
+                result = self.calculator.calculate(expression_input)
+                st.session_state.calculated_result = result
 
-        # Calculate manually or on Enter
-        if st.button("Calculate", key="calculate_btn"):
-            result = self.calculator.calculate(expression_input)
-            st.session_state.calculated_result = result
-
+        # Automatically show result if already calculated
         if st.session_state.calculated_result != "":
             st.markdown(f"<div class='result'>Result: {st.session_state.calculated_result}</div>", unsafe_allow_html=True)
 
