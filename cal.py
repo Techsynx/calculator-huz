@@ -1,38 +1,33 @@
 import streamlit as st
 
-# Step 1: Page Config (Set title and layout)
-st.set_page_config(page_title="Simple Calculator", layout="centered")
+# Set page config
+st.set_page_config(page_title="Basic Calculator", layout="centered")
 
-# Step 2: Title of the App
-st.title("🧮 Streamlit Calculator")
+# App title
+st.title("Simple Calculator")
 
-# Step 3: Create session state to store input
-if 'expression' not in st.session_state:
+# Initialize expression in session state
+if "expression" not in st.session_state:
     st.session_state.expression = ""
 
-# Step 4: Function to handle button press
-def press(button_text):
-    if button_text == "C":
+# Handle button press
+def press(key):
+    if key == "C":
         st.session_state.expression = ""
-    elif button_text == "=":
+    elif key == "=":
         try:
-            # Evaluate the expression safely
             st.session_state.expression = str(eval(st.session_state.expression))
         except:
             st.session_state.expression = "Error"
     else:
-        st.session_state.expression += button_text
+        st.session_state.expression += key
 
-# Step 5: Text input for keyboard typing
-keyboard_input = st.text_input("Type your expression or use the buttons below:", 
-                               value=st.session_state.expression,
-                               key="input_box")
+# Keyboard input
+input_text = st.text_input("Enter expression:", value=st.session_state.expression, key="input")
+st.session_state.expression = input_text  # Sync typed input
 
-# Sync typed input with session state
-st.session_state.expression = keyboard_input
-
-# Step 6: Display calculator buttons
-buttons = [
+# Buttons layout
+button_rows = [
     ["7", "8", "9", "/"],
     ["4", "5", "6", "*"],
     ["1", "2", "3", "-"],
@@ -40,13 +35,13 @@ buttons = [
     ["="]
 ]
 
-# Step 7: Show buttons as columns
-for row in buttons:
+# Display buttons (large and spaced)
+for row in button_rows:
     cols = st.columns(len(row))
-    for i, button in enumerate(row):
-        if cols[i].button(button):
-            press(button)
+    for i, key in enumerate(row):
+        if cols[i].button(key, use_container_width=True):
+            press(key)
 
-# Step 8: Show result/output
-st.subheader("Result:")
+# Display result
+st.subheader("Output:")
 st.code(st.session_state.expression)
