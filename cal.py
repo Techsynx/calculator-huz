@@ -1,32 +1,39 @@
 import streamlit as st
 
-# Set page config
+# 1) Set up page configuration
 st.set_page_config(page_title="Basic Calculator", layout="centered")
 
-# App title
+# 2) Title
 st.title("Simple Calculator")
 
-# Initialize expression in session state
-if "expression" not in st.session_state:
-    st.session_state.expression = ""
+# 3) Session state variables
+if 'typed_expr' not in st.session_state:
+    st.session_state.typed_expr = ""  # Stores what user types or clicks
+if 'result' not in st.session_state:
+    st.session_state.result = ""      # Stores the evaluated result
 
-# Handle button press
+# 4) Function to handle button clicks
 def press(key):
     if key == "C":
-        st.session_state.expression = ""
+        # Clear both the typed expression and the result
+        st.session_state.typed_expr = ""
+        st.session_state.result = ""
     elif key == "=":
         try:
-            st.session_state.expression = str(eval(st.session_state.expression))
+            # Evaluate the typed expression
+            st.session_state.result = str(eval(st.session_state.typed_expr))
         except:
-            st.session_state.expression = "Error"
+            # If there's an error, display "Error"
+            st.session_state.result = "Error"
     else:
-        st.session_state.expression += key
+        # Append clicked key to the typed expression
+        st.session_state.typed_expr += key
 
-# Keyboard input
-input_text = st.text_input("Enter expression:", value=st.session_state.expression, key="input")
-st.session_state.expression = input_text  # Sync typed input
+# 5) Text input: for user typing with the keyboard
+typed_input = st.text_input("Enter expression:", value=st.session_state.typed_expr)
+st.session_state.typed_expr = typed_input
 
-# Buttons layout
+# 6) Buttons (larger)
 button_rows = [
     ["7", "8", "9", "/"],
     ["4", "5", "6", "*"],
@@ -35,13 +42,14 @@ button_rows = [
     ["="]
 ]
 
-# Display buttons (large and spaced)
 for row in button_rows:
-    cols = st.columns(len(row))
+    cols = st.columns(len(row))  # Create columns for each row
     for i, key in enumerate(row):
+        # 'use_container_width=True' makes the button full column width (bigger)
         if cols[i].button(key, use_container_width=True):
             press(key)
 
-# Display result
+# 7) Display the result ONLY if '=' has been pressed
 st.subheader("Output:")
-st.code(st.session_state.expression)
+if st.session_state.result:
+    st.code(st.session_state.result)
