@@ -1,6 +1,6 @@
 
+![image](https://github.com/user-attachments/assets/a34bf39a-f9a5-4bc9-ba9d-53f5ebc513d5)
 
-## 📄 `README.md` (Project Description)
 
 markdown
 # 🧮 Streamlit Arithmetic Calculator
@@ -26,7 +26,7 @@ It supports both **mouse click** events and **keyboard input** for performing ba
 Clone the repository and install the dependencies:
 
 ```bash
-git clone https://github.com/your-username/calculator-huz.git
+git clone https://github.com/Techsynx/calculator-huz.git
 ```
 ```
 cd streamlit-calculator
