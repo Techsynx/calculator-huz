@@ -103,7 +103,7 @@ class CalculatorUI:
                 elif button == '*':
                     button = 'Mul'
                 with cols[i]: 
-                    if st.button(button, key=button, help=button, css_class="button"):
+                    if st.button(button, key=button):
                         if button == 'Add':
                             self.handle_button_click('+')
                         elif button == 'Sub':
@@ -125,4 +125,6 @@ class CalculatorUI:
                 st.write("Please enter an expression and click the 'Calculate' button.")
                 
 calculator = Calculator()
-calculator_ui =
+calculator_ui = CalculatorUI(calculator)
+calculator_ui.display_calculator_buttons()
+calculator_ui.display_result()
