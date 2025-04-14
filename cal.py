@@ -8,12 +8,12 @@ st.markdown("""
             background-image: linear-gradient(315deg, #ffffff 0%, #335c81 74%);
         }
         .button {
-            font-size: 20px;  /* Increase button font size */
-            padding: 20px;    /* Increase button padding */
+            font-size: 40px;  /* Increase button font size */
+            padding: 10px;    /* Increase button padding */
             width: 100%;       /* Make buttons full width */
         }
         .result {
-            font-size: 30px;  /* Increase result font size */
+            font-size: 50px;  /* Increase result font size */
             font-weight: bold; /* Make result bold */
             color: #335c81;    /* Change result color */
         }
