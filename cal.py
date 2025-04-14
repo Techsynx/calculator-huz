@@ -1,92 +1,128 @@
 import streamlit as st
-from streamlit.components.v1 import html
+import re
 
-# Initialize session state
-if 'expression' not in st.session_state:
-    st.session_state.expression = ''
-if 'result' not in st.session_state:
-    st.session_state.result = ''
-
-def calculate():
-    try:
-        st.session_state.result = eval(st.session_state.expression)
-    except:
-        st.session_state.result = 'Error'
-
-def clear():
-    st.session_state.expression = ''
-    st.session_state.result = ''
-
-# JavaScript for auto-focus and keyboard input
-keyboard_js = """
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const handleKeyPress = (event) => {
-        const key = event.key;
-        const validKeys = ['0','1','2','3','4','5','6','7','8','9','+','-','*','/','.','Enter','Backspace'];
-        
-        if (validKeys.includes(key)) {
-            if (key === 'Enter') {
-                parent.document.querySelector('input[type="text"]').value += '';
-                parent.document.querySelector('input[type="text"]').dispatchEvent(new Event('input'));
-                parent.window.top.document.querySelector('button[kind="secondary"]').click();
-            } else if (key === 'Backspace') {
-                parent.document.querySelector('input[type="text"]').value = 
-                    parent.document.querySelector('input[type="text"]').value.slice(0, -1);
-                parent.document.querySelector('input[type="text"]').dispatchEvent(new Event('input'));
-            } else {
-                parent.document.querySelector('input[type="text"]').value += key;
-                parent.document.querySelector('input[type="text"]').dispatchEvent(new Event('input'));
-            }
+# --- Custom Styles ---
+st.markdown("""
+    <style>
+        .stApp {
+            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%) !important;
         }
-    };
+        button[kind="secondary"] {
+            font-size: 24px !important;
+            height: 60px !important;
+            width: 100% !important;
+            border-radius: 12px !important;
+            margin: 2px 0 !important;
+        }
+        .highlight-btn {
+            background-color: #FFD700 !important;
+            color: black !important;
+        }
+        .result {
+            font-size: 40px;
+            font-weight: bold;
+            color: #000000;
+            padding-top: 15px;
+        }
+        input[type="text"] {
+            font-size: 24px !important;
+            padding: 10px !important;
+        }
+    </style>
+    <script>
+        window.onload = function() {
+            const input = window.parent.document.querySelector('input[type="text"]');
+            if(input) input.focus();
+        }
+    </script>
+""", unsafe_allow_html=True)
 
-    // Auto-focus on page load
-    parent.document.querySelector('input[type="text"]').focus();
-    
-    // Add event listener for key presses
-    document.addEventListener('keydown', handleKeyPress);
-});
-</script>
-"""
 
-# Inject keyboard handling JavaScript
-html(keyboard_js, height=0)
+# --- Calculator Logic ---
+class Calculator:
+    def perform_operation(self, a, b, operator):
+        if operator == '➕':
+            return a + b
+        elif operator == '➖':
+            return a - b
+        elif operator == '✖️':
+            return a * b
+        elif operator == '➗':
+            if b == 0:
+                raise ValueError('Error (division by zero)')
+            return a / b
 
-# Calculator UI
-st.title("Calculator")
+    def calculate(self, expression_input):
+        try:
+            expression_input = expression_input.replace('➕', '+').replace('➖', '-').replace('✖️', '*').replace('➗', '/')
+            operators = ['+', '-', '*', '/', '%', '//']
+            split_result = [x.strip() for x in re.split(r'[\+\-\*/%\s//]+', expression_input)]
+            extracted_operators = [op for op in expression_input if op in operators]
+            split_result = [int(x) for x in split_result]
+            result = split_result[0]
+            for i, operator in enumerate(extracted_operators):
+                result = self.perform_operation(result, split_result[i + 1], operator)
+            return result
+        except ValueError as ve:
+            return f"Error: {ve}"
+        except ZeroDivisionError:
+            return "Error: Division by zero is not allowed."
+        except Exception as e:
+            return f"An unexpected error occurred: {e}"
 
-# Input field
-expression = st.text_input("", value=st.session_state.expression, key='expression')
 
-# Buttons
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    st.button("7", on_click=lambda: st.session_state.update(expression=st.session_state.expression + '7'))
-    st.button("4", on_click=lambda: st.session_state.update(expression=st.session_state.expression + '4'))
-    st.button("1", on_click=lambda: st.session_state.update(expression=st.session_state.expression + '1'))
-    st.button(".", on_click=lambda: st.session_state.update(expression=st.session_state.expression + '.'))
+# --- Calculator UI ---
+class CalculatorUI:
+    def __init__(self, calculator):
+        self.calculator = calculator
+        if "expression" not in st.session_state:
+            st.session_state.expression = ""
+        if "calculated_result" not in st.session_state:
+            st.session_state.calculated_result = ""
 
-with col2:
-    st.button("8", on_click=lambda: st.session_state.update(expression=st.session_state.expression + '8'))
-    st.button("5", on_click=lambda: st.session_state.update(expression=st.session_state.expression + '5'))
-    st.button("2", on_click=lambda: st.session_state.update(expression=st.session_state.expression + '2'))
-    st.button("0", on_click=lambda: st.session_state.update(expression=st.session_state.expression + '0'))
+    def handle_button_click(self, value):
+        if value == "C":
+            st.session_state.expression = ""
+            st.session_state.calculated_result = ""
+        else:
+            st.session_state.expression += str(value)
 
-with col3:
-    st.button("9", on_click=lambda: st.session_state.update(expression=st.session_state.expression + '9'))
-    st.button("6", on_click=lambda: st.session_state.update(expression=st.session_state.expression + '6'))
-    st.button("3", on_click=lambda: st.session_state.update(expression=st.session_state.expression + '3'))
-    st.button("=", on_click=calculate, type='primary')
+    def display_calculator_buttons(self):
+        rows = [
+            ['7', '8', '9', '➕'],
+            ['4', '5', '6', '➖'],
+            ['1', '2', '3', '✖️'],
+            ['0', '➗', 'C', '']
+        ]
 
-with col4:
-    st.button("÷", on_click=lambda: st.session_state.update(expression=st.session_state.expression + '/'))
-    st.button("×", on_click=lambda: st.session_state.update(expression=st.session_state.expression + '*'))
-    st.button("-", on_click=lambda: st.session_state.update(expression=st.session_state.expression + '-'))
-    st.button("+", on_click=lambda: st.session_state.update(expression=st.session_state.expression + '+'))
+        for row in rows:
+            cols = st.columns(4, gap="small")
+            for i, key in enumerate(row):
+                if key == '':
+                    continue
+                with cols[i]:
+                    if st.button(key, key=f"btn_{key}"):
+                        self.handle_button_click(key)
 
-st.button("Clear", on_click=clear)
+    def display_input_and_result(self):
+        with st.form("input_form", clear_on_submit=False):
+            expression_input = st.text_input("Enter your expression:",
+                                             value=st.session_state.expression,
+                                             key="expression_input")
 
-# Display result
-if st.session_state.result != '':
-    st.subheader(f"Result: {st.session_state.result}")
+            submitted = st.form_submit_button("Calculate")
+            if submitted:
+                st.session_state.expression = expression_input
+                result = self.calculator.calculate(expression_input)
+                st.session_state.calculated_result = result
+
+        # Automatically show result if already calculated
+        if st.session_state.calculated_result != "":
+            st.markdown(f"<div class='result'>Result: {st.session_state.calculated_result}</div>", unsafe_allow_html=True)
+
+
+# --- Run App ---
+calculator = Calculator()
+calculator_ui = CalculatorUI(calculator)
+calculator_ui.display_calculator_buttons()
+calculator_ui.display_input_and_result()
