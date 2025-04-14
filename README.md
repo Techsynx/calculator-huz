@@ -55,14 +55,14 @@ Enjoy calculating!
 
 ## 🧑‍💻 Author
 
-- Your Name
+- huzaifa malik
 - GitHub: [Techsynx](https://github.com/Techsynx)
-```
 
----
+
+
 
 ## 📦 `requirements.txt`
-
+```
 streamlit
 ```
 
