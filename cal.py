@@ -7,12 +7,21 @@ st.markdown("""
             background-color: #ffffff;
             background-image: linear-gradient(315deg, #ffffff 0%, #335c81 74%);
         }
+        .button {
+            font-size: 20px;  /* Increase button font size */
+            padding: 20px;    /* Increase button padding */
+            width: 100%;       /* Make buttons full width */
+        }
+        .result {
+            font-size: 30px;  /* Increase result font size */
+            font-weight: bold; /* Make result bold */
+            color: #335c81;    /* Change result color */
+        }
     </style>
 """, unsafe_allow_html=True)
 
-
 st.markdown("""
-    <h1 style="font-size: 25px; font-weight: bold; color: #C0C0C0;">Hello, I am Huzaifa , welcome in my Advance Calculator</h1>
+    <h1 style="font-size: 25px; font-weight: bold; color: #C0C0C0;">Hello, I am Huzaifa, welcome to my Advanced Calculator</h1>
 """, unsafe_allow_html=True)
 
 class Calculator:
@@ -94,7 +103,7 @@ class CalculatorUI:
                 elif button == '*':
                     button = 'Mul'
                 with cols[i]: 
-                    if st.button(button):
+                    if st.button(button, key=button, help=button, css_class="button"):
                         if button == 'Add':
                             self.handle_button_click('+')
                         elif button == 'Sub':
@@ -104,7 +113,6 @@ class CalculatorUI:
                         else:
                             self.handle_button_click(str(button))
 
-
     def display_result(self):
         """Display the result of the calculation."""
         expression_input = st.text_input("Enter the expression:", value=st.session_state.expression, key="expression_input")
@@ -112,12 +120,9 @@ class CalculatorUI:
         if st.button("Calculate"):
             if expression_input:
                 result = self.calculator.calculate(expression_input)
-                st.write(f"Result of expression: {result}")
+                st.markdown(f"<div class='result'>Result of expression: {result}</div>", unsafe_allow_html=True)
             else:
                 st.write("Please enter an expression and click the 'Calculate' button.")
                 
 calculator = Calculator()
-calculator_ui = CalculatorUI(calculator)
-calculator_ui.display_calculator_buttons()
-calculator_ui.display_result()
-
+calculator_ui =
