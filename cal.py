@@ -108,14 +108,13 @@ class CalculatorUI:
                     self.handle_button_click(item)
 
     def display_input_and_result(self):
-        expression_input = st.text_input("Enter your expression:", value=st.session_state.expression, key="expression_input")
+        with st.form(key="calc_form"):
+            expression_input = st.text_input("Enter your expression:", value=st.session_state.expression, key="expression_input")
 
-        if expression_input != st.session_state.expression:
-            st.session_state.expression = expression_input
+            submitted = st.form_submit_button("Calculate")
 
-        col1, col2 = st.columns([1, 3])
-        with col1:
-            if st.button("Calculate"):
+            if submitted or expression_input != st.session_state.expression:
+                st.session_state.expression = expression_input
                 result = self.calculator.calculate(st.session_state.expression)
                 st.session_state.result = result
 
