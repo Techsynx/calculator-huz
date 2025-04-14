@@ -34,7 +34,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown("""
-    <h1 style="text-align: center; color: #333333;">Hello, I am Huzaifa 👋<br>Welcome to my Advanced Calculator</h1>
+    <h1 style="text-align: center; color: #333333;">Hello, I am Huzaifa <br>Welcome to my  Calculator</h1>
 """, unsafe_allow_html=True)
 
 class Calculator:
