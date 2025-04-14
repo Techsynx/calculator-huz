@@ -1,80 +1,134 @@
 import streamlit as st
+import math
 
-# Function to perform calculations
-def calculate(expression):
-    try:
-        # Evaluate the expression
-        result = eval(expression)
-        return result
-    except Exception:
-        return "Error"
+# Memory for storing values
+memory = 0
 
-# Streamlit app layout
-st.title("Simple Arithmetic Calculator")
+# Function to perform the calculation
+def calculate(operation, num1, num2=None):
+    if operation == 'Add':
+        return num1 + num2
+    elif operation == 'Subtract':
+        return num1 - num2
+    elif operation == 'Multiply':
+        return num1 * num2
+    elif operation == 'Divide':
+        if num2 != 0:
+            return num1 / num2
+        else:
+            return 'Error: Division by zero'
+    elif operation == 'Power':
+        return math.pow(num1, num2)
+    elif operation == 'Square Root':
+        return math.sqrt(num1)
+    elif operation == 'Logarithm':
+        return math.log10(num1)
+    elif operation == 'Natural Log':
+        return math.log(num1)
+    elif operation == 'Sine':
+        return math.sin(math.radians(num1))
+    elif operation == 'Cosine':
+        return math.cos(math.radians(num1))
+    elif operation == 'Tangent':
+        return math.tan(math.radians(num1))
+    elif operation == 'Inverse Sine':
+        return math.degrees(math.asin(num1))
+    elif operation == 'Inverse Cosine':
+        return math.degrees(math.acos(num1))
+    elif operation == 'Inverse Tangent':
+        return math.degrees(math.atan(num1))
+    elif operation == 'Hyperbolic Sine':
+        return math.sinh(num1)
+    elif operation == 'Hyperbolic Cosine':
+        return math.cosh(num1)
+    elif operation == 'Hyperbolic Tangent':
+        return math.tanh(num1)
+    elif operation == 'Factorial':
+        return math.factorial(int(num1))
+    elif operation == 'Modulus':
+        return num1 % num2
+    else:
+        return 'Invalid operation'
 
-# Input field for the expression
-expression = st.text_input("Enter your expression:", "", key="input")
+# Streamlit UI
+st.title('Advanced Calculator')
 
-# Button to calculate the result
-if st.button("Calculate", key="calculate"):
-    result = calculate(expression)
-    st.write("Result:", result)
+# Theme options
+theme = st.selectbox('Select Theme', ('Light', 'Dark'))
+if theme == 'Dark':
+    st.markdown(
+        """
+        <style>
+        .reportview-container {
+            background: #333333;
+            color: #ffffff;
+        }
+        .sidebar .sidebar-content {
+            background: #444444;
+            color: #ffffff;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
-# Displaying a simple calculator interface
-st.subheader("Calculator Buttons")
-col1, col2, col3 = st.columns(3)
+# Using columns for better layout
+col1, col2 = st.columns(2)
 
-# Function to create buttons
-def create_button(label):
-    return st.button(label, key=label)
-
-# Create buttons for numbers and operations
 with col1:
-    for i in range(1, 4):
-        if create_button(str(i)):
-            expression += str(i)
-            st.session_state.input = expression  # Update the input field
+    num1 = st.number_input('Enter the first number', value=0.0, format="%.2f")
 
-    if create_button("+"):
-        expression += "+"
-        st.session_state.input = expression  # Update the input field
+# Selection of operation
+operation = st.selectbox('Select an operation', (
+    'Add', 'Subtract', 'Multiply', 'Divide', 'Power', 'Square Root', 'Logarithm',
+    'Natural Log', 'Sine', 'Cosine', 'Tangent', 'Inverse Sine', 'Inverse Cosine', 
+    'Inverse Tangent', 'Hyperbolic Sine', 'Hyperbolic Cosine', 'Hyperbolic Tangent', 
+    'Factorial', 'Modulus'
+))
 
-with col2:
-    for i in range(4, 7):
-        if create_button(str(i)):
-            expression += str(i)
-            st.session_state.input = expression  # Update the input field
+# Display second number input only if the operation requires two numbers
+num2 = None
+if operation not in ['Square Root', 'Sine', 'Cosine', 'Tangent', 'Inverse Sine', 'Inverse Cosine', 'Inverse Tangent', 'Hyperbolic Sine', 'Hyperbolic Cosine', 'Hyperbolic Tangent', 'Factorial']:
+    with col2:
+        num2 = st.number_input('Enter the second number', value=0.0, format="%.2f")
 
-    if create_button("-"):
-        expression += "-"
-        st.session_state.input = expression  # Update the input field
+# Memory functions
+st.sidebar.header("Memory Functions")
+if st.sidebar.button('M+'):
+    memory += num1
+elif st.sidebar.button('M-'):
+    memory -= num1
+elif st.sidebar.button('MR'):
+    st.sidebar.write(f'Recalled memory: {memory}')
+elif st.sidebar.button('MC'):
+    memory = 0
 
-with col3:
-    for i in range(7, 10):
-        if create_button(str(i)):
-            expression += str(i)
-            st.session_state.input = expression  # Update the input field
+# Perform the calculation
+if st.button('Calculate'):
+    result = calculate(operation, num1, num2)
+    st.markdown(f'<h3 style="color:{"white" if theme == "Dark" else "blue"};">The result is: {result}</h3>', unsafe_allow_html=True)
 
-    if create_button("*"):
-        expression += "*"
-        st.session_state.input = expression  # Update the input field
+# Display recent calculations (for simplicity, store the last calculation)
+if 'history' not in st.session_state:
+    st.session_state['history'] = []
 
-# Additional buttons
-if create_button("0"):
-    expression += "0"
-    st.session_state.input = expression  # Update the input field
+if st.button('Show History'):
+    st.write(st.session_state['history'])
 
-if create_button("/"):
-    expression += "/"
-    st.session_state.input = expression  # Update the input field
+# Store the latest calculation in history
+if 'result' in locals() and result not in ['Invalid operation', 'Error: Division by zero']:
+    st.session_state['history'].append(f'{num1} {operation} {num2 if num2 is not None else ""} = {result}')
 
-if create_button("C"):  # Clear button
-    expression = ""
-    st.session_state.input = expression  # Update the input field
+# Option to switch between degrees and radians for trigonometric calculations
+st.sidebar.header("Settings")
+angle_unit = st.sidebar.radio('Angle Unit', ('Degrees', 'Radians'))
 
-if create_button("="):  # Equals button
-    result = calculate(expression)
-    st.write("Result:", result)
+# Function to convert angles
+def to_radians(angle, unit):
+    if unit == 'Degrees':
+        return math.radians(angle)
+    return angle
 
-# Display the current expression
-st.write("Current Expression:", expression)
+# Update the trigonometric functions to respect the angle unit setting
+if operation in ['Sine', 'Cosine', 'Tangent']:
+    num1 = to_radians(num1, angle_unit)
