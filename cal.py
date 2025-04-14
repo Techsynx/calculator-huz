@@ -12,7 +12,7 @@ st.markdown("""
 
 
 st.markdown("""
-    <h1 style="font-size: 25px; font-weight: bold; color: #C0C0C0;">Hello, I am Ashok , welcome in my Advance Calculator</h1>
+    <h1 style="font-size: 25px; font-weight: bold; color: #C0C0C0;">Hello, I am huzaifa, welcome in my Advance Calculator</h1>
 """, unsafe_allow_html=True)
 
 class Calculator:
@@ -88,18 +88,18 @@ class CalculatorUI:
                     continue
                 button = str(button)
                 if button == '+':
-                    button = 'Add'
+                    button = '+'
                 elif button == '-':
-                    button = 'Sub'
+                    button = '-'
                 elif button == '*':
-                    button = 'Mul'
+                    button = '*'
                 with cols[i]: 
                     if st.button(button):
-                        if button == 'Add':
+                        if button == '+':
                             self.handle_button_click('+')
-                        elif button == 'Sub':
+                        elif button == '-':
                             self.handle_button_click('-')
-                        elif button == 'Mul':
+                        elif button == '*':
                             self.handle_button_click('*')
                         else:
                             self.handle_button_click(str(button))
@@ -121,32 +121,6 @@ calculator_ui = CalculatorUI(calculator)
 calculator_ui.display_calculator_buttons()
 calculator_ui.display_result()
 
-st.markdown(
-    """
-    <style>
-    .button-container {
-        display: flex;
-        justify-content: center;
-        position: fixed;
-        bottom: 20px;
-        width: 100%;
-    }
-    .button-container a {
-        font-size: 18px;
-        padding: 10px 20px;
-        background-color: #4CAF50;
-        color: white;
-        text-align: center;
-        border-radius: 5px;
-        text-decoration: none;
-    }
-    .button-container a:hover {
-        background-color: #45a049;
-    }
-    </style>
-    <div class="button-container">
-        <a href="https://ashok-prajapati2.github.io/Portfolio/" target="_blank">About Me</a>
-    </div>
-    """,
+
     unsafe_allow_html=True,
 )
