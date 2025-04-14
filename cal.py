@@ -1,38 +1,37 @@
 import streamlit as st
 import re
 
-# --- Style ---
+# --- Custom Styles ---
 st.markdown("""
     <style>
         .stApp {
-            background-color: #85FFBD;
-            background-image: linear-gradient(315deg, #FFFB7D 0%, #335c81 74%);
+            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%) !important;
         }
-        .calc-button {
-            font-size: 22px;
-            padding: 20px;
-            width: 100%;
-            border-radius: 10px;
-            margin: 0px !important;
+
+        button[kind="secondary"] {
+            font-size: 24px !important;
+            height: 60px !important;
+            width: 100% !important;
+            border-radius: 12px !important;
+            margin: 2px 0 !important;
         }
-        .highlight {
-            background-color: #ffdd57 !important;
+
+        .highlight-btn {
+            background-color: #FFD700 !important;
             color: black !important;
         }
+
         .result {
             font-size: 40px;
             font-weight: bold;
             color: #000000;
-            padding-top: 10px;
+            padding-top: 15px;
         }
     </style>
 """, unsafe_allow_html=True)
 
 # --- Calculator Logic ---
 class Calculator:
-    def __init__(self):
-        self.expression = ""
-
     def perform_operation(self, a, b, operator):
         if operator == '+':
             return a + b
@@ -66,7 +65,7 @@ class Calculator:
         except Exception as e:
             return f"An unexpected error occurred: {e}"
 
-# --- UI Class ---
+# --- Calculator UI ---
 class CalculatorUI:
     def __init__(self, calculator):
         self.calculator = calculator
@@ -98,12 +97,9 @@ class CalculatorUI:
             for i, key in enumerate(row):
                 if key == '':
                     continue
-                btn_class = "calc-button"
-                if st.session_state.last_key == key:
-                    btn_class += " highlight"
 
                 with cols[i]:
-                    if st.button(f"<span class='{btn_class}'>{key}</span>", key=key, use_container_width=True, unsafe_allow_html=True):
+                    if st.button(key, key=f"btn_{key}"):
                         self.handle_button_click(key)
 
     def display_input_and_result(self):
@@ -111,22 +107,21 @@ class CalculatorUI:
                                          value=st.session_state.expression, 
                                          key="expression_input")
 
-        # Keyboard typing sets last key for highlight effect
+        # Sync keyboard typed key for highlight simulation
         if expression_input:
             last_char = expression_input[-1]
             if last_char.isalnum() or last_char in ['+', '-', '*', '/']:
                 st.session_state.last_key = last_char
             st.session_state.expression = expression_input
 
-        # Calculate on Enter or Button
-        calculate_clicked = st.button("Calculate")
-        if calculate_clicked or expression_input:
+        # Calculate manually or on Enter
+        if st.button("Calculate", key="calculate_btn"):
             result = self.calculator.calculate(expression_input)
             st.session_state.calculated_result = result
 
-        # Display result
         if st.session_state.calculated_result != "":
             st.markdown(f"<div class='result'>Result: {st.session_state.calculated_result}</div>", unsafe_allow_html=True)
+
 
 # --- Run App ---
 calculator = Calculator()
