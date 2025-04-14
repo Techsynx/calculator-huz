@@ -1,128 +1,128 @@
 import streamlit as st
 import re
 
-# --- Custom Styles ---
+# Set page config
+st.set_page_config(page_title="Huzaifa's Calculator", layout="centered")
+
+# Inject custom CSS
 st.markdown("""
     <style>
         .stApp {
-            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%) !important;
+            background: linear-gradient(to bottom right, #a8edea, #fed6e3);
         }
-        button[kind="secondary"] {
-            font-size: 24px !important;
-            height: 60px !important;
-            width: 100% !important;
-            border-radius: 12px !important;
-            margin: 2px 0 !important;
+        .calculator-button {
+            font-size: 30px;
+            padding: 20px;
+            width: 100%;
+            background-color: #1f1f1f;
+            color: white;
+            border-radius: 10px;
         }
-        .highlight-btn {
-            background-color: #FFD700 !important;
-            color: black !important;
+        .calculator-button:hover {
+            background-color: #333;
         }
-        .result {
-            font-size: 40px;
-            font-weight: bold;
-            color: #000000;
-            padding-top: 15px;
-        }
-        input[type="text"] {
-            font-size: 24px !important;
-            padding: 10px !important;
+        .result-box {
+            background-color: #111;
+            color: #0f0;
+            font-size: 30px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
         }
     </style>
-    <script>
-        window.onload = function() {
-            const input = window.parent.document.querySelector('input[type="text"]');
-            if(input) input.focus();
-        }
-    </script>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+    <h1 style="text-align: center; color: #333333;">Hello, I am Huzaifa 👋<br>Welcome to my Advanced Calculator</h1>
+""", unsafe_allow_html=True)
 
-# --- Calculator Logic ---
 class Calculator:
+    def __init__(self):
+        self.expression = ""
+
     def perform_operation(self, a, b, operator):
-        if operator == '➕':
+        if operator == '+':
             return a + b
-        elif operator == '➖':
+        elif operator == '-':
             return a - b
-        elif operator == '✖️':
+        elif operator == '*':
             return a * b
-        elif operator == '➗':
+        elif operator == '/':
             if b == 0:
-                raise ValueError('Error (division by zero)')
+                raise ValueError('Division by zero')
             return a / b
+        elif operator == '%':
+            return a % b
+        elif operator == '//':
+            return a // b
 
     def calculate(self, expression_input):
         try:
-            expression_input = expression_input.replace('➕', '+').replace('➖', '-').replace('✖️', '*').replace('➗', '/')
+            expression_input = expression_input.replace('➕', '+').replace('➖', '-')\
+                                             .replace('✖️', '*').replace('➗', '/')
             operators = ['+', '-', '*', '/', '%', '//']
-            split_result = [x.strip() for x in re.split(r'[\+\-\*/%\s//]+', expression_input)]
-            extracted_operators = [op for op in expression_input if op in operators]
-            split_result = [int(x) for x in split_result]
-            result = split_result[0]
-            for i, operator in enumerate(extracted_operators):
-                result = self.perform_operation(result, split_result[i + 1], operator)
+            tokens = re.findall(r'\d+|[%s]' % re.escape(''.join(operators)), expression_input)
+            if not tokens:
+                return "Invalid input"
+            result = int(tokens[0])
+            i = 1
+            while i < len(tokens):
+                op = tokens[i]
+                num = int(tokens[i+1])
+                result = self.perform_operation(result, num, op)
+                i += 2
             return result
-        except ValueError as ve:
-            return f"Error: {ve}"
-        except ZeroDivisionError:
-            return "Error: Division by zero is not allowed."
         except Exception as e:
-            return f"An unexpected error occurred: {e}"
+            return f"Error: {e}"
 
 
-# --- Calculator UI ---
 class CalculatorUI:
     def __init__(self, calculator):
         self.calculator = calculator
         if "expression" not in st.session_state:
             st.session_state.expression = ""
-        if "calculated_result" not in st.session_state:
-            st.session_state.calculated_result = ""
+        if "result" not in st.session_state:
+            st.session_state.result = None
 
     def handle_button_click(self, value):
         if value == "C":
             st.session_state.expression = ""
-            st.session_state.calculated_result = ""
+            st.session_state.result = None
         else:
-            st.session_state.expression += str(value)
+            emoji_to_symbol = {'➕': '+', '➖': '-', '✖️': '*', '➗': '/'}
+            real_value = emoji_to_symbol.get(value, value)
+            st.session_state.expression += str(real_value)
 
     def display_calculator_buttons(self):
-        rows = [
+        layout = [
             ['7', '8', '9', '➕'],
             ['4', '5', '6', '➖'],
             ['1', '2', '3', '✖️'],
-            ['0', '➗', 'C', '']
+            ['0', '➗', 'C']
         ]
-
-        for row in rows:
-            cols = st.columns(4, gap="small")
-            for i, key in enumerate(row):
-                if key == '':
-                    continue
-                with cols[i]:
-                    if st.button(key, key=f"btn_{key}"):
-                        self.handle_button_click(key)
+        for row in layout:
+            cols = st.columns(len(row))
+            for i, item in enumerate(row):
+                if cols[i].button(item, key=f"btn_{item}", use_container_width=True):
+                    self.handle_button_click(item)
 
     def display_input_and_result(self):
-        with st.form("input_form", clear_on_submit=False):
-            expression_input = st.text_input("Enter your expression:",
-                                             value=st.session_state.expression,
-                                             key="expression_input")
+        expression_input = st.text_input("Enter your expression:", value=st.session_state.expression, key="expression_input")
 
-            submitted = st.form_submit_button("Calculate")
-            if submitted:
-                st.session_state.expression = expression_input
-                result = self.calculator.calculate(expression_input)
-                st.session_state.calculated_result = result
+        if expression_input != st.session_state.expression:
+            st.session_state.expression = expression_input
 
-        # Automatically show result if already calculated
-        if st.session_state.calculated_result != "":
-            st.markdown(f"<div class='result'>Result: {st.session_state.calculated_result}</div>", unsafe_allow_html=True)
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            if st.button("Calculate"):
+                result = self.calculator.calculate(st.session_state.expression)
+                st.session_state.result = result
 
+        if st.session_state.result is not None:
+            st.markdown(f"<div class='result-box'>Result: {st.session_state.result}</div>", unsafe_allow_html=True)
 
-# --- Run App ---
 calculator = Calculator()
-calculator_ui = CalculatorUI(calculator)
-calculator_ui.display_calculator_buttons()
-calculator_ui.display_input_and_result()
+ui = CalculatorUI(calculator)
+ui.display_calculator_buttons()
+ui.display_input_and_result()
