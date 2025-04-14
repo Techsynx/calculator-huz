@@ -122,5 +122,3 @@ calculator_ui.display_calculator_buttons()
 calculator_ui.display_result()
 
 
-    unsafe_allow_html=True,
-)
