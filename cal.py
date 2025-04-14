@@ -1,134 +1,152 @@
 import streamlit as st
-import math
+import re
 
-# Memory for storing values
-memory = 0
+st.markdown("""
+    <style>
+        .stApp {    
+            background-color: #ffffff;
+            background-image: linear-gradient(315deg, #ffffff 0%, #335c81 74%);
+        }
+    </style>
+""", unsafe_allow_html=True)
 
-# Function to perform the calculation
-def calculate(operation, num1, num2=None):
-    if operation == 'Add':
-        return num1 + num2
-    elif operation == 'Subtract':
-        return num1 - num2
-    elif operation == 'Multiply':
-        return num1 * num2
-    elif operation == 'Divide':
-        if num2 != 0:
-            return num1 / num2
+
+st.markdown("""
+    <h1 style="font-size: 25px; font-weight: bold; color: #C0C0C0;">Hello, I am Ashok , welcome in my Advance Calculator</h1>
+""", unsafe_allow_html=True)
+
+class Calculator:
+    def __init__(self):
+        self.expression = ""
+
+    def perform_operation(self, a, b, operator):
+        """Perform the basic arithmetic operations."""
+        if operator == '+':
+            return a + b
+        elif operator == '-':
+            return a - b
+        elif operator == '*':
+            return a * b
+        elif operator == '/':
+            if b == 0:
+                raise ValueError('Error (division by zero)')
+            return a / b
+        elif operator == '%':
+            return a % b
+        elif operator == '//':
+            return a // b
+
+    def calculate(self, expression_input):
+        """Process the expression and compute the result."""
+        try:
+            operators = ['+', '-', '*', '/', '%', '//']
+            split_result = [x.strip() for x in re.split(r'[\+\-\*/%\s//]+', expression_input)]
+            extracted_operators = [op for op in expression_input if op in operators]
+
+            split_result = [int(x) for x in split_result]
+
+            result = split_result[0]
+            
+            for i, operator in enumerate(extracted_operators):
+                result = self.perform_operation(result, split_result[i + 1], operator)
+
+            return result
+        except ValueError as ve:
+            return f"Error: {ve}"
+        except ZeroDivisionError:
+            return "Error: Division by zero is not allowed."
+        except Exception as e:
+            return f"An unexpected error occurred: {e}"
+
+
+class CalculatorUI:
+    def __init__(self, calculator):
+        self.calculator = calculator
+        if "expression" not in st.session_state:
+            st.session_state.expression = ""
+
+    def handle_button_click(self, value):
+        """Update the expression when a button is clicked."""
+        if value == "C":
+            st.session_state.expression = ""
         else:
-            return 'Error: Division by zero'
-    elif operation == 'Power':
-        return math.pow(num1, num2)
-    elif operation == 'Square Root':
-        return math.sqrt(num1)
-    elif operation == 'Logarithm':
-        return math.log10(num1)
-    elif operation == 'Natural Log':
-        return math.log(num1)
-    elif operation == 'Sine':
-        return math.sin(math.radians(num1))
-    elif operation == 'Cosine':
-        return math.cos(math.radians(num1))
-    elif operation == 'Tangent':
-        return math.tan(math.radians(num1))
-    elif operation == 'Inverse Sine':
-        return math.degrees(math.asin(num1))
-    elif operation == 'Inverse Cosine':
-        return math.degrees(math.acos(num1))
-    elif operation == 'Inverse Tangent':
-        return math.degrees(math.atan(num1))
-    elif operation == 'Hyperbolic Sine':
-        return math.sinh(num1)
-    elif operation == 'Hyperbolic Cosine':
-        return math.cosh(num1)
-    elif operation == 'Hyperbolic Tangent':
-        return math.tanh(num1)
-    elif operation == 'Factorial':
-        return math.factorial(int(num1))
-    elif operation == 'Modulus':
-        return num1 % num2
-    else:
-        return 'Invalid operation'
+            st.session_state.expression += str(value)
 
-# Streamlit UI
-st.title('Advanced Calculator')
+    def display_calculator_buttons(self):
+        """Display calculator buttons on the Streamlit interface."""
+        cols = st.columns(4)  # Adjusting to 4 columns
+        col_list = [
+            [7, 8, 9, '+'], 
+            [4, 5, 6, '-'],  
+            [1, 2, 3, '*'],  
+            [0, '/', 'C', '']  
+        ]
+        
+        for row in col_list:
+            for i, button in enumerate(row):
+                if button == '':
+                    continue
+                button = str(button)
+                if button == '+':
+                    button = 'Add'
+                elif button == '-':
+                    button = 'Sub'
+                elif button == '*':
+                    button = 'Mul'
+                with cols[i]: 
+                    if st.button(button):
+                        if button == 'Add':
+                            self.handle_button_click('+')
+                        elif button == 'Sub':
+                            self.handle_button_click('-')
+                        elif button == 'Mul':
+                            self.handle_button_click('*')
+                        else:
+                            self.handle_button_click(str(button))
 
-# Theme options
-theme = st.selectbox('Select Theme', ('Light', 'Dark'))
-if theme == 'Dark':
-    st.markdown(
-        """
-        <style>
-        .reportview-container {
-            background: #333333;
-            color: #ffffff;
-        }
-        .sidebar .sidebar-content {
-            background: #444444;
-            color: #ffffff;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
 
-# Using columns for better layout
-col1, col2 = st.columns(2)
+    def display_result(self):
+        """Display the result of the calculation."""
+        expression_input = st.text_input("Enter the expression:", value=st.session_state.expression, key="expression_input")
+        
+        if st.button("Calculate"):
+            if expression_input:
+                result = self.calculator.calculate(expression_input)
+                st.write(f"Result of expression: {result}")
+            else:
+                st.write("Please enter an expression and click the 'Calculate' button.")
+                
+calculator = Calculator()
+calculator_ui = CalculatorUI(calculator)
+calculator_ui.display_calculator_buttons()
+calculator_ui.display_result()
 
-with col1:
-    num1 = st.number_input('Enter the first number', value=0.0, format="%.2f")
-
-# Selection of operation
-operation = st.selectbox('Select an operation', (
-    'Add', 'Subtract', 'Multiply', 'Divide', 'Power', 'Square Root', 'Logarithm',
-    'Natural Log', 'Sine', 'Cosine', 'Tangent', 'Inverse Sine', 'Inverse Cosine', 
-    'Inverse Tangent', 'Hyperbolic Sine', 'Hyperbolic Cosine', 'Hyperbolic Tangent', 
-    'Factorial', 'Modulus'
-))
-
-# Display second number input only if the operation requires two numbers
-num2 = None
-if operation not in ['Square Root', 'Sine', 'Cosine', 'Tangent', 'Inverse Sine', 'Inverse Cosine', 'Inverse Tangent', 'Hyperbolic Sine', 'Hyperbolic Cosine', 'Hyperbolic Tangent', 'Factorial']:
-    with col2:
-        num2 = st.number_input('Enter the second number', value=0.0, format="%.2f")
-
-# Memory functions
-st.sidebar.header("Memory Functions")
-if st.sidebar.button('M+'):
-    memory += num1
-elif st.sidebar.button('M-'):
-    memory -= num1
-elif st.sidebar.button('MR'):
-    st.sidebar.write(f'Recalled memory: {memory}')
-elif st.sidebar.button('MC'):
-    memory = 0
-
-# Perform the calculation
-if st.button('Calculate'):
-    result = calculate(operation, num1, num2)
-    st.markdown(f'<h3 style="color:{"white" if theme == "Dark" else "blue"};">The result is: {result}</h3>', unsafe_allow_html=True)
-
-# Display recent calculations (for simplicity, store the last calculation)
-if 'history' not in st.session_state:
-    st.session_state['history'] = []
-
-if st.button('Show History'):
-    st.write(st.session_state['history'])
-
-# Store the latest calculation in history
-if 'result' in locals() and result not in ['Invalid operation', 'Error: Division by zero']:
-    st.session_state['history'].append(f'{num1} {operation} {num2 if num2 is not None else ""} = {result}')
-
-# Option to switch between degrees and radians for trigonometric calculations
-st.sidebar.header("Settings")
-angle_unit = st.sidebar.radio('Angle Unit', ('Degrees', 'Radians'))
-
-# Function to convert angles
-def to_radians(angle, unit):
-    if unit == 'Degrees':
-        return math.radians(angle)
-    return angle
-
-# Update the trigonometric functions to respect the angle unit setting
-if operation in ['Sine', 'Cosine', 'Tangent']:
-    num1 = to_radians(num1, angle_unit)
+st.markdown(
+    """
+    <style>
+    .button-container {
+        display: flex;
+        justify-content: center;
+        position: fixed;
+        bottom: 20px;
+        width: 100%;
+    }
+    .button-container a {
+        font-size: 18px;
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        text-align: center;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+    .button-container a:hover {
+        background-color: #45a049;
+    }
+    </style>
+    <div class="button-container">
+        <a href="https://ashok-prajapati2.github.io/Portfolio/" target="_blank">About Me</a>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
