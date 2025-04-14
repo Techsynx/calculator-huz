@@ -15,7 +15,7 @@ st.markdown("""
         .result {
             font-size: 50px;  /* Increase result font size */
             font-weight: bold; /* Make result bold */
-            color: #335c81;    /* Change result color */
+            color:  #000000;    /* Change result color */
         }
     </style>
 """, unsafe_allow_html=True)
